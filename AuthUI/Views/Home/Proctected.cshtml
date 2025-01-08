@@ -11,15 +11,29 @@
     </thead>
     <tbody id="weatherTable"></tbody>
 </table>
-   
 
 <script>
     FetchWeatherData();
+
     function FetchWeatherData(){
-    fetch('http://localhost:7878/weatherForecast')
-        .then(response => response.json())
+        const jwtToken = localStorage.getItem('token');  // Replace with your actual JWT token
+
+        fetch('http://localhost:7878/weatherForecast', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${jwtToken}`,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             const table = document.getElementById('weatherTable');
+            table.innerHTML = ''; // Clear existing table rows
             data.forEach(forecast => {
                 const row = `<tr>
                     <td>${forecast.date}</td>
@@ -29,6 +43,7 @@
                 </tr>`;
                 table.innerHTML += row;
             });
-        });
+        })
+        .catch(error => console.error('Error fetching weather data:', error));
     }
 </script>
